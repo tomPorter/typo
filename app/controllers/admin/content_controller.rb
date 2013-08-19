@@ -27,6 +27,18 @@ class Admin::ContentController < Admin::BaseController
     new_or_edit
   end
 
+  def merge_articles
+    @article = Article.find(params[:id])
+    unless @article.access_by? current_user
+      redirect_to :action => 'index'
+      flash[:error] = _("Error, you are not allowed to perform this action")
+      return
+    end   
+    #body_to_merge = Article.find(params[:merge_with]).body
+    body_to_merge = nil
+    new_or_edit body_to_merge
+  end
+
   def edit
     @article = Article.find(params[:id])
     unless @article.access_by? current_user
@@ -139,7 +151,7 @@ class Admin::ContentController < Admin::BaseController
 
   def real_action_for(action); { 'add' => :<<, 'remove' => :delete}[action]; end
 
-  def new_or_edit
+  def new_or_edit(body_to_merge=nil)
     id = params[:id]
     id = params[:article][:id] if params[:article] && params[:article][:id]
     @article = Article.get_or_build_article(id)
