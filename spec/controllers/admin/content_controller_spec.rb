@@ -483,9 +483,7 @@ describe Admin::ContentController do
 
     describe 'edit action' do
 
-      it 'should merge articles' do
-        post :merge_articles,'id' => @article.id, :merge_with => '4'
-      end
+      it 'should merge articles' 
 
       it 'should edit article' do
         get :edit, 'id' => @article.id

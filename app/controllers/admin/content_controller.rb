@@ -6,6 +6,22 @@ class Admin::ContentController < Admin::BaseController
 
   cache_sweeper :blog_sweeper
 
+  def merge_with
+    unless Profile.find(current_user.profile_id).label == "admin"
+      flash[:error] = _("You are not allowed to perform a merge action")
+      redirect_to :action => :index
+    end
+
+    article = Article.find_by_id(params[:id])
+    if article.merge_with(params[:merge_with])
+      flash[:notice] = _("Articles successfully merged!")
+      redirect_to :action => :index
+    else
+      flash[:notice] = _("Articles couldn't be merged")
+      redirect_to :action => :edit, :id => params[:id]
+    end
+  end
+
   def auto_complete_for_article_keywords
     @items = Tag.find_with_char params[:article][:keywords].strip
     render :inline => "<%= raw auto_complete_result @items, 'name' %>"
@@ -27,20 +43,9 @@ class Admin::ContentController < Admin::BaseController
     new_or_edit
   end
 
-  def merge_articles
-    @article = Article.find(params[:id])
-    unless @article.access_by? current_user
-      redirect_to :action => 'index'
-      flash[:error] = _("Error, you are not allowed to perform this action")
-      return
-    end   
-    #body_to_merge = Article.find(params[:merge_with]).body
-    body_to_merge = nil
-    new_or_edit body_to_merge
-  end
-
   def edit
     @article = Article.find(params[:id])
+    @user_is_admin = Profile.find(current_user.profile_id).label == "admin"
     unless @article.access_by? current_user
       redirect_to :action => 'index'
       flash[:error] = _("Error, you are not allowed to perform this action")
@@ -151,7 +156,7 @@ class Admin::ContentController < Admin::BaseController
 
   def real_action_for(action); { 'add' => :<<, 'remove' => :delete}[action]; end
 
-  def new_or_edit(body_to_merge=nil)
+  def new_or_edit
     id = params[:id]
     id = params[:article][:id] if params[:article] && params[:article][:id]
     @article = Article.get_or_build_article(id)
