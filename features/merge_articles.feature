@@ -21,6 +21,8 @@ Feature: Merge Articles
             | id | type    | author | body     | article_id | user_id | created_at          |
             | 1  | Comment | user_1 | Comment1 | 3          | 2       | 2012-23-11 21:31:00 |
             | 2  | Comment | user_1 | Comment2 | 4          | 2       | 2012-24-11 22:01:00 |
+            | 3  | Comment | user_1 | Comment3 | 3          | 2       | 2012-23-11 22:31:00 |
+            | 4  | Comment | user_1 | Comment4 | 4          | 2       | 2012-24-11 23:01:00 |
 
     Scenario: A non-admin cannot merge articles
         Given I am logged in as "user_1" with pass "1234567"
@@ -56,6 +58,8 @@ Feature: Merge Articles
         When I follow "Article1"
         Then I should see "Comment1"
         And I should see "Comment2"
+        And I should see "Comment3"
+        And I should see "Comment4"
 
     Scenario: The title should be either one of the merged articles
         Given the articles with ids "3" and "4" were merged
