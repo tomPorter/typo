@@ -16,8 +16,17 @@ Given /I am logged in as "(.*?)" with pass "(.*?)"$/ do |user, pass|
 end
 
 Given /the articles with ids "(\d+)" and "(\d+)" were merged$/ do |id1, id2|
-  article = Article.find_by_id(id1)
-  article.merge_with(id2)
+  steps %[Given I am logged in as "admin" with pass "aaaaaaaa"
+        And I am on the Edit Page of Article with id #{id1}
+        Then I should see "Merge Articles"
+        When I fill in "merge_with" with "#{id2}"
+        And I press "Merge"
+        Then I should be on the admin content page
+        And I should see "Articles successfully merged!" ]
+
+
+  #article = Article.find_by_id(id1)
+  #article.merge_with(id2)
 end
 
 Then /"(.*?)" should be author of (\d+) articles$/ do |user, count|
