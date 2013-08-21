@@ -61,6 +61,30 @@ describe Article do
     end
   end
 
+  describe "#merge_with" do
+    it "should merge articles two existing articles and all comments should be in first article" do
+      a = Factory(:article,  :body => 'a')
+      b = Factory(:article,  :body => 'b')
+      a.comments << Factory(:comment)
+      a.comments << Factory(:comment)
+      b.comments << Factory(:comment)
+      b.comments << Factory(:comment)
+      assert a.merge_with(b.id)
+      assert_equal 4,a.comments.size
+    end
+    it "merged articles should contain body of both articles" do
+      a = Factory(:article,  :body => 'a')
+      b = Factory(:article,  :body => 'b')
+      assert a.merge_with(b.id)
+      assert_equal "a\n\nb", a.body
+    end
+    it "should not merge non-existant articles" do
+      a = Factory(:article,  :body => 'a')
+     a.merge_with(0).should be_false
+    end
+
+  end
+
   describe "#initialize" do
     it "accepts a settings field in its parameter hash" do
       Article.new({"password" => 'foo'})
@@ -184,25 +208,25 @@ describe Article do
   ### XXX: Should we have a test here?
   it "test_send_multiple_pings" do
   end
-  
+
   describe "Testing redirects" do
     it "a new published article gets a redirect" do
       a = Article.create(:title => "Some title", :body => "some text", :published => true)
       a.redirects.first.should_not be_nil
       a.redirects.first.to_path.should == a.permalink_url
     end
-    
-    it "a new unpublished article should not get a redirect" do 
+
+    it "a new unpublished article should not get a redirect" do
       a = Article.create(:title => "Some title", :body => "some text", :published => false)
       a.redirects.first.should be_nil
     end
-    
+
     it "Changin a published article permalink url should only change the to redirection" do
       a = Article.create(:title => "Some title", :body => "some text", :published => true)
       a.redirects.first.should_not be_nil
       a.redirects.first.to_path.should == a.permalink_url
       r  = a.redirects.first.from_path
-      
+
       a.permalink = "some-new-permalink"
       a.save
       a.redirects.first.should_not be_nil
@@ -571,7 +595,7 @@ describe Article do
     describe "#find_by_permalink" do
       it "uses UTC to determine correct day" do
         @a.save
-        a = Article.find_by_permalink :year => 2011, :month => 2, :day => 21, :permalink => 'a-big-article' 
+        a = Article.find_by_permalink :year => 2011, :month => 2, :day => 21, :permalink => 'a-big-article'
         a.should == @a
       end
     end
@@ -592,7 +616,7 @@ describe Article do
     describe "#find_by_permalink" do
       it "uses UTC to determine correct day" do
         @a.save
-        a = Article.find_by_permalink :year => 2011, :month => 2, :day => 22, :permalink => 'a-big-article' 
+        a = Article.find_by_permalink :year => 2011, :month => 2, :day => 22, :permalink => 'a-big-article'
         a.should == @a
       end
     end

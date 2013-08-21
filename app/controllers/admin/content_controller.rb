@@ -29,7 +29,7 @@ class Admin::ContentController < Admin::BaseController
 
   def index
     @search = params[:search] ? params[:search] : {}
-    
+
     @articles = Article.search_with_pagination(@search, {:page => params[:page], :per_page => this_blog.admin_display_elements})
 
     if request.xhr?
@@ -61,7 +61,7 @@ class Admin::ContentController < Admin::BaseController
       flash[:error] = _("Error, you are not allowed to perform this action")
       return(redirect_to :action => 'index')
     end
-    
+
     return(render 'admin/shared/destroy') unless request.post?
 
     @record.destroy
@@ -94,7 +94,7 @@ class Admin::ContentController < Admin::BaseController
 
   def attachment_save(attachment)
     begin
-      Resource.create(:filename => attachment.original_filename, :mime => attachment.content_type.chomp, 
+      Resource.create(:filename => attachment.original_filename, :mime => attachment.content_type.chomp,
                       :created_at => Time.now).write_to_disk(attachment)
     rescue => e
       logger.info(e.message)
@@ -109,7 +109,7 @@ class Admin::ContentController < Admin::BaseController
     @article.text_filter = current_user.text_filter if current_user.simple_editor?
 
     get_fresh_or_existing_draft_for_article
-    
+
     @article.attributes = params[:article]
     @article.published = false
     set_article_author
@@ -176,13 +176,13 @@ class Admin::ContentController < Admin::BaseController
     @article.keywords = Tag.collection_to_string @article.tags
     @article.attributes = params[:article]
     # TODO: Consider refactoring, because double rescue looks... weird.
-        
+
     @article.published_at = DateTime.strptime(params[:article][:published_at], "%B %e, %Y %I:%M %p GMT%z").utc rescue Time.parse(params[:article][:published_at]).utc rescue nil
 
     if request.post?
       set_article_author
       save_attachments
-      
+
       @article.state = "draft" if @article.draft
 
       if @article.save

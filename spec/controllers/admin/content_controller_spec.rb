@@ -48,7 +48,7 @@ describe Admin::ContentController do
       response.should render_template('index')
       response.should be_success
     end
-    
+
     it 'should restrict to withdrawn articles' do
       article = Factory(:article, :state => 'withdrawn', :published_at => '2010-01-01')
       get :index, :search => {:state => 'withdrawn'}
@@ -56,7 +56,7 @@ describe Admin::ContentController do
       response.should render_template('index')
       response.should be_success
     end
-  
+
     it 'should restrict to withdrawn articles' do
       article = Factory(:article, :state => 'withdrawn', :published_at => '2010-01-01')
       get :index, :search => {:state => 'withdrawn'}
@@ -483,7 +483,18 @@ describe Admin::ContentController do
 
     describe 'edit action' do
 
-      it 'should merge articles' 
+      it 'should merge articles'  do
+        other_article = Factory(:article)
+        get :edit, 'id' => @article.id, 'action' => 'merge_with' ,:merge_with => other_article.id
+        response.should redirect_to :action => :index
+        flash[:notice].should eql("Articles successfully merged!")
+      end
+
+      it 'should not merge non-existant articles'  do
+        get :edit, 'id' => @article.id, 'action' => 'merge_with' ,:merge_with => 0
+        response.should redirect_to :action => :edit, :id => @article.id
+        flash[:notice].should eql("Articles couldn't be merged")
+      end
 
       it 'should edit article' do
         get :edit, 'id' => @article.id
@@ -625,6 +636,15 @@ describe Admin::ContentController do
     it_should_behave_like 'destroy action'
 
     describe 'edit action' do
+
+      ## Triggers 'double redirect error in test, not sure why?'
+      ## Not sure how/where to place this test.
+      # it 'should not allow non-admin users to merge articles' do
+      #   other_article = Factory(:article)
+      #   get :edit, 'id' => @article.id, 'action' => 'merge_with' ,:merge_with => other_article.id
+      #   response.should redirect_to :action => :index
+      #   flash[:notice].should eql("You are not allowed to perform a merge action")
+      # end
 
       it "should redirect if edit article doesn't his" do
         get :edit, :id => Factory(:article, :user => Factory(:user, :login => 'another_user')).id
